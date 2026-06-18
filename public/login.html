@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+
+    <!-- CSS EXTERNO -->
+    <link rel="stylesheet" href="css/login.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg,
+                    #1e3c72,
+                    #5b2b82,
+                    #2a7fff);
+            background-size: 400% 400%;
+            animation: gradientMove 15s ease infinite;
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .orbs span {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.35), transparent 70%);
+            filter: blur(20px);
+            animation: orbFloat 18s linear infinite;
+            opacity: 0.6;
+        }
+
+        .orbs span:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            animation-duration: 22s;
+        }
+
+        .orbs span:nth-child(2) {
+            top: 60%;
+            left: 20%;
+            animation-duration: 26s;
+        }
+
+        .orbs span:nth-child(3) {
+            top: 40%;
+            left: 70%;
+            animation-duration: 20s;
+        }
+
+        .orbs span:nth-child(4) {
+            top: 75%;
+            left: 80%;
+            animation-duration: 30s;
+        }
+
+        @keyframes orbFloat {
+            from {
+                transform: translate(0, 0);
+            }
+
+            to {
+                transform: translate(120px, -200px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="orbs">
+        <span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="background">
+        <div class="layer layer-1"></div>
+        <div class="layer layer-2"></div>
+        <div class="layer layer-3"></div>
+    </div>
+
+    <div class="line" style="left:5%"></div>
+    <div class="line" style="left:15%"></div>
+    <div class="line" style="left:25%"></div>
+    <div class="line" style="left:35%"></div>
+    <div class="line" style="left:45%"></div>
+    <div class="line" style="left:55%"></div>
+    <div class="line" style="left:65%"></div>
+    <div class="line" style="left:75%"></div>
+    <div class="line" style="left:85%"></div>
+
+    <div class="login-box" id="loginBox">
+        <h2>Login</h2>
+
+        <div class="error" id="errorMsg"></div>
+
+        <div class="input-wrapper">
+            <input type="text" id="usuario" placeholder="Usuário">
+            <span class="input-icon">👤</span>
+        </div>
+
+        <div class="password-wrapper">
+            <input type="password" id="senha" placeholder="Senha">
+            <span id="mostrarSenha">👁️</span>
+        </div>
+
+        <button type="button" id="btnLogin">Entrar</button>
+        <button type="button" id="btnCadastro" class="btn-cadastro">Cadastrar</button>
+
+        <div class="link">
+            <a href="esqueci-senha.html">Esqueci minha senha</a>
+        </div>
+    </div>
+
+    <script>
+        const loginBox = document.getElementById('loginBox');
+        const btnLogin = document.getElementById('btnLogin');
+        const btnCadastro = document.getElementById('btnCadastro');
+        const errorMsg = document.getElementById('errorMsg');
+        const usuarioInput = document.getElementById('usuario');
+        const senhaInput = document.getElementById('senha');
+        const mostrarSenhaBtn = document.getElementById('mostrarSenha');
+
+        // efeito 3D
+        document.addEventListener('mousemove', (e) => {
+            const rect = loginBox.getBoundingClientRect();
+            const distance = 80;
+
+            const isNear =
+                e.clientX > rect.left - distance &&
+                e.clientX < rect.right + distance &&
+                e.clientY > rect.top - distance &&
+                e.clientY < rect.bottom + distance;
+
+            loginBox.classList.toggle('expanded', isNear);
+
+            const x = (window.innerWidth / 2 - e.clientX) / 30;
+            const y = (window.innerHeight / 2 - e.clientY) / 30;
+
+            loginBox.style.transform = `
+                translateY(-4px)
+                rotateX(${y}deg)
+                rotateY(${-x}deg)
+            `;
+        });
+
+        document.addEventListener('mouseleave', () => {
+            loginBox.style.transform = 'translateY(0) rotateX(0) rotateY(0)';
+        });
+
+        // mostrar senha
+        mostrarSenhaBtn.onclick = () => {
+            senhaInput.type = senhaInput.type === 'password' ? 'text' : 'password';
+        };
+
+        // LOGIN
+        btnLogin.onclick = async () => {
+            const usuario = usuarioInput.value.trim();
+            const senha = senhaInput.value.trim();
+
+            if (!usuario || !senha) {
+                errorMsg.textContent = 'Preencha todos os campos';
+                return;
+            }
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario, senha })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('logado', 'true');
+                    localStorage.setItem('usuario', data.usuario);
+                    window.location.href = 'index.html';
+                } else {
+                    errorMsg.style.color = '#ef4444';
+                    errorMsg.textContent = data.error || 'Usuário ou senha inválidos';
+                }
+
+            } catch (err) {
+                errorMsg.textContent = 'Erro ao conectar com o servidor';
+            }
+        };
+
+        // ✅ CADASTRAR (CORREÇÃO)
+        btnCadastro.onclick = () => {
+            window.location.href = 'cadastro.html';
+        };
+    </script>
+
+</body>
+
+</html>
