@@ -1,13 +1,25 @@
 const { Pool } = require('pg');
 
-// 🔧 Dados do PostgreSQL
-const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'pessoas_db',
-  password: 'Vitinho4831', // ⚠️ depois a gente tira isso do código (env)
-  port: 5432,
-});
+let pool;
+
+// Se o site estiver rodando no Render, ele usa a variável online. 
+// Se estiver no seu computador, ele usa os dados locais abaixo!
+if (process.env.DATABASE_URL) {
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false
+    }
+  });
+} else {
+  pool = new Pool({
+    user: 'postgres',
+    host: 'localhost',
+    database: 'pessoas_db',
+    password: 'vitinho4831',
+    port: 5432,
+  });
+}
 
 // 🔌 Teste de conexão (uma vez só)
 pool.connect()
