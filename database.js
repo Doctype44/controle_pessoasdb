@@ -36,6 +36,9 @@ pool.connect()
 ========================= */
 async function criarTabelas() {
   try {
+    // ⚠️ ESSA LINHA ABAIXO LIMPA A TABELA ANTIGA INCOMPLETA PARA CRIAR A NOVA CORRETA:
+    await pool.query(`DROP TABLE IF EXISTS usuarios CASCADE;`);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS pessoas (
         id SERIAL PRIMARY KEY,
@@ -51,6 +54,27 @@ async function criarTabelas() {
         criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS usuarios (
+        id SERIAL PRIMARY KEY,
+        usuario VARCHAR(50) UNIQUE NOT NULL,
+        email VARCHAR(150) NOT NULL, -- 👈 ADICIONADO O EMAIL QUE ESTAVA FALTANDO!
+        senha VARCHAR(100) NOT NULL
+      )
+    `);
+
+    await pool.query(`
+      INSERT INTO usuarios (usuario, email, senha) -- 👈 Adicionado email aqui também
+      VALUES ('admin', 'admin@email.com', '1234')
+      ON CONFLICT (usuario) DO NOTHING
+    `);
+
+    console.log('✅ Tabelas verificadas/criadas com sucesso!');
+  } catch (err) {
+    console.error('❌ Erro ao criar tabelas:', err.message);
+  }
+}
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS usuarios (
